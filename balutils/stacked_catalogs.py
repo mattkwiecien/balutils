@@ -142,19 +142,6 @@ class H5Catalog(Catalog):
 
         return
 
-    def calc_mags(self):
-        '''
-        Mcal catalogs don't automatically come with magnitudes
-        '''
-
-        fluxes = [c for c in self._cat.colnames if 'flux' in c.lower()]
-        bands = [f[-1] for f in fluxes]
-
-        for b in bands:
-            self._cat['mag_{}'.format(b)]= self.flux2mag(self._cat['flux_{}'.format(b)])
-
-        return
-
     def __delete__(self):
         self._h5cat.close()
         super(Catalog, self).__delete__()
@@ -164,7 +151,7 @@ class H5Catalog(Catalog):
 class McalCatalog(H5Catalog):
 
     def __init__(self, filename, basepath, cols=None):
-        super(H5Catalog, self).__init__(filename, basepath, cols=cols)
+        super(McalCatalog, self).__init__(filename, basepath, cols=cols)
 
         self.calc_mags()
 
@@ -214,8 +201,7 @@ class BalrogMcalCatalog(Catalog):
 
     def _load_catalog(self):
         if self.vb is True: print('Loading Mcal catalog...')
-        # mcal = McalCatalog(self.mcal_file, self.mcal_path, cols=self.mcal_cols)
-        mcal = H5Catalog(self.mcal_file, self.mcal_path, cols=self.mcal_cols)
+        mcal = McalCatalog(self.mcal_file, self.mcal_path, cols=self.mcal_cols)
         mcal.calc_mags()
 
         if self.vb is True: print('Loading Detection catalog...')
