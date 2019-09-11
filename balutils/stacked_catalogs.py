@@ -43,6 +43,14 @@ class Catalog(object):
     def get_cat(self):
         return self._cat
 
+    def _check_for_cols(self, cols):
+        for col in cols:
+            if col not in self._cat.colnames:
+                raise AttributeError('{} not found in joined '.format(col) +
+                                     'catalog but required for requested cuts!')
+
+        return
+
     # The following are so we can access the catalog
     # values similarly to a dict
     def __getitem__(self, key):
@@ -63,6 +71,52 @@ class Catalog(object):
     def __repr__(self):
         return repr(self._cat)
 
+class GoldCatalog(Catalog):
+    _gold_cut_cols_default = ['flags_foreground',
+                              'flags_badregions',
+                              'flags_footprint',
+                              'meas_FLAGS_GOLD'
+                              ]
+    _gold_cut_cols_mof_only = ['flags_foreground',
+                               'flags_badregions',
+                               'flags_footprint',
+                               'meas_FLAGS_GOLD_MOF_ONLY'
+                               ]
+    _gold_cut_cols_sof_only = ['flags_foreground',
+                               'flags_badregions',
+                               'flags_footprint',
+                               'meas_FLAGS_GOLD_SOF_ONLY'
+                               ]
+
+    _gold_cut_cols = {'default':_gold_cut_cols_default,
+                      'mof_only':_gold_cut_cols_mof_only,
+                      'sof_only':_gold_cut_cols_sof_only
+                      }
+
+    def __init__(self, filename, cols=None, match_type='default'):
+        super(GoldCatalog, self).__init__(filename, cols=None)
+        if match_type == 'default':
+            self.flags_gold_colname = 'meas_FLAGS_GOLD'
+        if match_type == 'mof_only':
+            self.flags_gold_colname = 'meas_FLAGS_GOLD_MOF_ONLY'
+        if match_type == 'sof_only':
+            self.flags_gold_colname = 'meas_FLAGS_GOLD_SOF_ONLY'
+
+        return
+
+    def apply_gold_cuts(self):
+        self._check_for_cols(self._gold_cut_cols[self.match_type])
+        gold_cuts = np.where( (self._cat['flags_foreground'] == 0) &
+                              (self._cat['flags_badregions'] < 2) &
+                              (self._cat['flags_footprint'] == 1) &
+                              (self._cat[self.flags_gold_colname] < 2)
+                            )
+        self.apply_cut(gold_cuts)
+
+        return
+
+    pass
+
 class FitsCatalog(Catalog):
     def _load_catalog(self):
         self._cat = Table(fitsio.read(self.filename, columns=self.cols))
@@ -70,10 +124,19 @@ class FitsCatalog(Catalog):
 
         return
 
-class DetectionCatalog(FitsCatalog):
+# TODO: Remove if not useful
+# class MatchedFitsCatalog(FitsCatalog, GoldCatalog):
+#     def __init__(self, filename, cols=None, match_type='default'):
+#         super(MatchedCatalot, self).__init__(filename, cols=cols, match_type='default')
+#         self.match_type = match_type
 
-    def __init__(self, filename, cols=None):
-        super(DetectionCatalog, self).__init__(filename, cols=cols)
+#         return
+
+class DetectionCatalog(FitsCatalog, GoldCatalog):
+
+    def __init__(self, filename, cols=None, match_type='default'):
+        super(DetectionCatalog, self).__init__(filename, cols=cols, match_type='default')
+        self.match_type = match_type
 
         self._check_for_duplicates()
 
@@ -98,15 +161,15 @@ class DetectionCatalog(FitsCatalog):
             print('Removing the following duplicates from detection catalog:')
             print(dup_ids)
 
-        Nbefore = self.Nobjs
-        for did in dup_ids:
-            indx = np.where(self._cat['bal_id']==did)[0]
-            self._cat.remove_row(indx[0])
+            Nbefore = self.Nobjs
+            for did in dup_ids:
+                indx = np.where(self._cat['bal_id']==did)[0]
+                self._cat.remove_row(indx[0])
 
-        self.Nobjs = len(self._cat)
-        assert self.Nobjs == (Nbefore - Ndups)
+            self.Nobjs = len(self._cat)
+            assert self.Nobjs == (Nbefore - Ndups)
 
-        print('{} duplicates removed, catalog size now {}'.format(Ndups, self.Nobjs))
+            print('{} duplicates removed, catalog size now {}'.format(Ndups, self.Nobjs))
 
         return
 
@@ -150,6 +213,12 @@ class H5Catalog(Catalog):
 
 class McalCatalog(H5Catalog):
 
+    _shape_cut_cols = ['flags',
+                       'T',
+                       'psf_T',
+                       'snr'
+                      ]
+
     def __init__(self, filename, basepath, cols=None):
         super(McalCatalog, self).__init__(filename, basepath, cols=cols)
 
@@ -170,28 +239,29 @@ class McalCatalog(H5Catalog):
 
         return
 
-class BalrogMcalCatalog(Catalog):
+    def apply_shape_cuts(self):
+        self._check_for_cols(self._shape_cut_cols)
+        shape_cuts = np.where( (self._cat['flags'] == 0) &
+                              ((self._cat['T']/self._cat['psf_T']) > 0.5) &
+                              (self._cat['snr'] > 10) &
+                              (self._cat['snr'] < 100)
+                            )
+        self.apply_cut(shape_cuts)
 
-    _gold_cut_cols = ['flags_foreground',
-                      'flags_badregions',
-                      'flags_footprint',
-                      'meas_FLAGS_GOLD'
-                     ]
+        return
 
-    _shape_cut_cols = ['flags',
-                       'T',
-                       'psf_T',
-                       'snr'
-                      ]
+class BalrogMcalCatalog(Catalog, GoldCatalog):
 
     def __init__(self, mcal_file, det_file, mcal_cols=None, det_cols=None,
-                 mcal_path='catalog/unsheared', save_all=False, vb=False):
+                 mcal_path='catalog/unsheared', match_type='default', save_all=False,
+                 vb=False):
 
         self.mcal_file = mcal_file
         self.det_file = det_file
         self.mcal_cols = mcal_cols
         self.det_cols = det_cols
         self.mcal_path = mcal_path
+        self.match_type = match_type
         self.save_all = save_all
         self.vb = vb
 
@@ -205,7 +275,7 @@ class BalrogMcalCatalog(Catalog):
         mcal.calc_mags()
 
         if self.vb is True: print('Loading Detection catalog...')
-        det  = DetectionCatalog(self.det_file, cols=self.det_cols)
+        det = DetectionCatalog(self.det_file, cols=self.det_cols)
 
         if self.vb is True: print('Joining catalogs...')
         self._join(mcal.get_cat(), det.get_cat())
@@ -225,30 +295,4 @@ class BalrogMcalCatalog(Catalog):
 
         return
 
-    def apply_gold_cuts(self):
-        self._check_for_cols(self._gold_cut_cols)
-        gold_cuts = np.where( (self._cat['flags_foreground'] == 0) &
-                              (self._cat['flags_badregions'] < 2) &
-                              (self._cat['flags_footprint'] == 1) &
-                              (self._cat['meas_FLAGS_GOLD'] < 2)
-                            )
-        self.apply_cut(gold_cuts)
 
-        return
-
-    def apply_shape_cuts(self):
-        self._check_for_cols(self._shape_cut_cols)
-        shape_cuts = np.where( (self._cat['flags'] == 0) &
-                              ((self._cat['T']/self._cat['psf_T']) > 0.5) &
-                              (self._cat['snr'] > 10) &
-                              (self._cat['snr'] < 100)
-                            )
-        self.apply_cut(shape_cuts)
-
-        return
-
-    def _check_for_cols(self, cols):
-        for col in cols:
-            if col not in self._cat.colnames:
-                raise AttributeError('{} not found in joined '.format(col) +
-                                     'catalog but required for requested cuts!')
