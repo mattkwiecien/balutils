@@ -34,7 +34,7 @@ def main():
     # DF mag vs Y3 mag
     print('Starting DF mag vs Y3 mag...')
     gold_cols = ['SOF_CM_MAG_G', 'SOF_CM_MAG_R', 'SOF_CM_MAG_I', 'SOF_CM_MAG_Z']
-    gold = sc.GoldCatalog(gold_file, cols=gold_cols)
+    gold = sc.GoldFitsCatalog(gold_file, cols=gold_cols)
 
     df_cols = ['bdf_mag']
     df = sc.FitsCatalog(df_file, cols=df_cols)
