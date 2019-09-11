@@ -250,7 +250,7 @@ class McalCatalog(H5Catalog):
 
         return
 
-class BalrogMcalCatalog(Catalog, GoldCatalog):
+class BalrogMcalCatalog(GoldCatalog):
 
     def __init__(self, mcal_file, det_file, mcal_cols=None, det_cols=None,
                  mcal_path='catalog/unsheared', match_type='default', save_all=False,

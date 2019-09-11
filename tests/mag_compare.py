@@ -3,12 +3,12 @@ import numpy as np
 # import os
 import matplotlib.pyplot as plt
 
-import stacked_catalogs as sc
+import balutils.stacked_catalogs as sc
 
 df_file   = '/data/des80.a/data/yanny/deepmeds4/run-ugriz-mof02.fits'
-gold_file = '/data/des81.a/data/severett/tests/bright_objs/Y3_GOLD_2_2_0.01_mags.fits'
-det_file  = '/data/des41.b/data/severett/Balrog/prod/stacked_catalogs/1.4/sof/balrog_detection_catalog_v1.4.fits'
-mcal_file = '/data/des41.b/data/severett/Balrog/prod/stacked_catalogs/1.4/mcal/...fits'
+gold_file = '/data/des81.a/data/severett/tests/bright_objs/Y3_GOLD_2_2_0.02_mags.fits'
+det_file  = '/data/des41.b/data/severett/Balrog/prod020419/stacked_catalogs/1.4/sof/balrog_detection_catalog_sof_v1.4.fits'
+mcal_file = '/data/des41.b/data/severett/Balrog/prod020419/stacked_catalogs/1.4/mcal/balrog_mcal_stack-y3v02-0-riz-noNB-mcal_v1.4.h5'
 
 def plot_mags(mags, mmin=15, mmax=30, dm=0.25, label='', a=0.5, s=10, show=True):
     bins = np.arange(mmin, mmax+dm, dm)
@@ -32,6 +32,7 @@ def main():
     # applied to gold cat to save memory
 
     # DF mag vs Y3 mag
+    print('Starting DF mag vs Y3 mag...')
     gold_cols = ['SOF_CM_MAG_G', 'SOF_CM_MAG_R', 'SOF_CM_MAG_I', 'SOF_CM_MAG_Z']
     gold = sc.GoldCatalog(gold_file, cols=gold_cols)
 
