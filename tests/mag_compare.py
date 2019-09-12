@@ -60,7 +60,7 @@ def main():
     df_cols = ['bdf_mag']
     print('Loading DF...')
     df = sc.FitsCatalog(df_file, cols=df_cols)
-    dcut = np.where( 
+    dcut = np.where(
                      (df['bdf_mag'][:,2]<mmax)
                    )
     df.apply_cut(dcut)
