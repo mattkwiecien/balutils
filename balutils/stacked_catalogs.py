@@ -127,7 +127,7 @@ class FitsCatalog(Catalog):
 # TODO: Remove if not useful
 class GoldFitsCatalog(FitsCatalog, GoldCatalog):
     def __init__(self, filename, cols=None, match_type='default'):
-        super(MatchedCatalot, self).__init__(filename, cols=cols, match_type='default')
+        super(GoldFitsCatalog, self).__init__(filename, cols=cols, match_type='default')
         self.match_type = match_type
 
         return
