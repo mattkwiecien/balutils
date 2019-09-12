@@ -95,12 +95,17 @@ class GoldCatalog(Catalog):
 
     def __init__(self, filename, cols=None, match_type='default'):
         super(GoldCatalog, self).__init__(filename, cols=None)
+        return
+
+    def _set_gold_colname(self, match_type)
         if match_type == 'default':
             self.flags_gold_colname = 'meas_FLAGS_GOLD'
-        if match_type == 'mof_only':
+        elif match_type == 'mof_only':
             self.flags_gold_colname = 'meas_FLAGS_GOLD_MOF_ONLY'
-        if match_type == 'sof_only':
+        elif match_type == 'sof_only':
             self.flags_gold_colname = 'meas_FLAGS_GOLD_SOF_ONLY'
+        else:
+            raise ValueError('match_type can only be default, mof_only, or sof_only')
 
         return
 
@@ -264,6 +269,8 @@ class BalrogMcalCatalog(GoldCatalog):
         self.match_type = match_type
         self.save_all = save_all
         self.vb = vb
+
+        self._set_gold_colname(match_type)
 
         self._load_catalog()
 
