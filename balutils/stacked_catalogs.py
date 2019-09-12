@@ -302,4 +302,46 @@ class BalrogMcalCatalog(GoldCatalog):
 
         return
 
+class BalrogMatchedCatalog(FitsCatalog, GoldCatalog):
+
+    def __init__(self, match_file, det_file, match_cols=None, det_cols=None,
+                 match_type='default', vb=False):
+
+        self.match_file = match_file
+        self.det_file = det_file
+        self.match_cols = match_cols
+        self.det_cols = det_cols
+        self.match_type = match_type
+        self.vb = vb
+
+        self._set_gold_colname(match_type)
+
+        self._load_catalog()
+
+        return
+
+    def _load_catalog(self):
+        if self.vb is True: print('Loading matched catalog...')
+        match = FitsCatalog(self.mcal_file, self.mcal_path, cols=self.mcal_cols)
+
+        if self.vb is True: print('Loading detection catalog...')
+        det = DetectionCatalog(self.det_file, cols=self.det_cols)
+
+        if self.vb is True: print('Joining catalogs...')
+        self._join(mcal.get_cat(), det.get_cat())
+
+        return
+
+
+    def _join(self, match, det):
+        self._cat = join(match, det, join_type='left')
+
+        if self.save_all is True:
+            self.match = match
+            self.det = det
+        else:
+            self.match = None
+            self.det = None
+
+        return
 
