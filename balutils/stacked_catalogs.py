@@ -305,13 +305,14 @@ class BalrogMcalCatalog(GoldCatalog):
 class BalrogMatchedCatalog(FitsCatalog, GoldCatalog):
 
     def __init__(self, match_file, det_file, match_cols=None, det_cols=None,
-                 match_type='default', vb=False):
+                 match_type='default', save_all=False, vb=False):
 
         self.match_file = match_file
         self.det_file = det_file
         self.match_cols = match_cols
         self.det_cols = det_cols
         self.match_type = match_type
+        self.save_all = save_all
         self.vb = vb
 
         self._set_gold_colname(match_type)
@@ -322,13 +323,13 @@ class BalrogMatchedCatalog(FitsCatalog, GoldCatalog):
 
     def _load_catalog(self):
         if self.vb is True: print('Loading matched catalog...')
-        match = FitsCatalog(self.mcal_file, self.mcal_path, cols=self.mcal_cols)
+        match = FitsCatalog(self.match_file, cols=self.match_cols)
 
         if self.vb is True: print('Loading detection catalog...')
         det = DetectionCatalog(self.det_file, cols=self.det_cols)
 
         if self.vb is True: print('Joining catalogs...')
-        self._join(mcal.get_cat(), det.get_cat())
+        self._join(match.get_cat(), det.get_cat())
 
         return
 
