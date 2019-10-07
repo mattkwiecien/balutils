@@ -27,7 +27,7 @@ gold_file = '/data/des81.a/data/severett/tests/bright_objs/Y3_GOLD_2_2_1.0_bobjs
 
 det_file = '/data/des81.a/data/severett/matched_stacks/run2/sof/balrog_detection_catalog_sof_run2_v1.0.fits'
 sof_file  = '/data/des81.a/data/severett/matched_stacks/run2/sof/balrog_matched_catalog_sof_v1.0.fits'
-mcal_file = '/data/des81.a/data/severett/matched_stacks/run2/mcal/balrog_mcal_stack-y3v02-0-riz-mcal_v1.0.h5'
+mcal_file = '/data/des81.a/data/severett/matched_stacks/run2/mcal/balrog_mcal_stack-y3v02-0-riz-noNB-mcal_v1.0.h5'
 
 if '1' in run_name:
     match_type = 'default'
