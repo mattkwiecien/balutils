@@ -15,16 +15,19 @@ import balutils.stacked_catalogs as sc
 #sof_file = '/data/des41.b/data/severett/Balrog/prod020419/stacked_catalogs/1.4/sof/balrog_matched_catalog_sof_v1.4.fits'
 
 # Files for Prerun2:
-run_name = 'Prerun2'
-df_file   = '/data/des80.a/data/yanny/deepmeds4/run-ugriz-mof02.fits'
-df_file   = '/data/des81.a/data/severett/tests/bright_objs/run-ugriz-mof02-tests.fits'
-inj_file  = '/data/des80.a/data/yanny/deepmeds4/BALROG_RUN2_DEEP_CAT_FLAG0INVHS1BDFLT254v4.fits'
-gold_file = '/data/des81.a/data/severett/tests/bright_objs/Y3_GOLD_2_2_1.0_bobjs_mags.fits'
-
+#run_name = 'Prerun2'
+#df_file   = '/data/des80.a/data/yanny/deepmeds4/run-ugriz-mof02.fits'
+#df_file   = '/data/des81.a/data/severett/tests/bright_objs/run-ugriz-mof02-tests.fits'
+#inj_file  = '/data/des80.a/data/yanny/deepmeds4/BALROG_RUN2_DEEP_CAT_FLAG0INVHS1BDFLT254v4.fits'
+#gold_file = '/data/des81.a/data/severett/tests/bright_objs/Y3_GOLD_2_2_1.0_bobjs_mags.fits'
 # det_file  = '/data/des81.a/data/severett/matched_stacks/prerun2/sof/balrog_detection_catalog_sof_v1.0.fits'
 # sof_file  = '/data/des81.a/data/severett/matched_stacks/prerun2/sof/balrog_matched_catalog_sof_v1.0.fits'
 # mcal_file = '/data/des81.a/data/severett/matched_stacks/prerun2/mcal/balrog_mcal_stack-y3v02-0-riz-mcal_v1.0.h5'
 
+run_name = 'Run2'
+df_file   = '/data/des80.a/data/yanny/deepmeds4/run-ugriz-mof02.fits'
+inj_file  = '/data/des80.a/data/yanny/deepmeds4/BALROG_RUN2_DEEP_CAT_FLAG0INVHS1BDFLT254v4.fits'
+gold_file = '/data/des81.a/data/severett/tests/bright_objs/Y3_GOLD_2_2_1.0_bobjs_mags.fits'
 det_file = '/data/des81.a/data/severett/matched_stacks/run2/sof/balrog_detection_catalog_sof_run2_v1.0.fits'
 sof_file  = '/data/des81.a/data/severett/matched_stacks/run2/sof/balrog_matched_catalog_sof_v1.0.fits'
 mcal_file = '/data/des81.a/data/severett/matched_stacks/run2/mcal/balrog_mcal_stack-y3v02-0-riz-mcal_v1.0.h5'
@@ -37,9 +40,9 @@ elif '2' in run_name:
 make_plots = {
 	'df_vs_wf':True,
 	'inj_vs_df':True,
-	'inj_vs_wf':False,
-	'sof_vs_wf':False,
-	'mcal_vs_wf':False,
+	'inj_vs_wf':True,
+	'sof_vs_wf':True,
+	'mcal_vs_wf':True,
 	'sof_vs_wf_s2n':False
 }
 
@@ -117,12 +120,12 @@ def main():
                        )
         df.apply_cut(dcut)
     elif '2' in run_name:
-        df_cols = ['bdf_mag', 'bdf_mask_flags']
+        df_cols = ['bdf_mag', 'mask_flags']
         print('Loading DF...')
         df = sc.FitsCatalog(df_file, cols=df_cols)
         dcut = np.where(
                          (df['bdf_mag'][:,2]<mmax) &
-                         (df['bdf_mask_flags']!=0)
+                         (df['mask_flags']!=0)
                        )
         df.apply_cut(dcut)
 
