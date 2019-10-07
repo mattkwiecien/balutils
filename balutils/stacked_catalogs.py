@@ -4,7 +4,7 @@ import fitsio
 import h5py
 import numpy as np
 from astropy.table import Table, vstack, join
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 # NOTE: Try using generators for Table chunks if files get too large!
 # http://docs.astropy.org/en/stable/io/ascii/read.html#reading-large-tables-in-chunks
@@ -97,7 +97,7 @@ class GoldCatalog(Catalog):
         super(GoldCatalog, self).__init__(filename, cols=None)
         return
 
-    def _set_gold_colname(self, match_type)
+    def _set_gold_colname(self, match_type):
         if match_type == 'default':
             self.flags_gold_colname = 'meas_FLAGS_GOLD'
         elif match_type == 'mof_only':
