@@ -8,9 +8,12 @@ import balutils.stacked_catalogs as sc
 df_file   = '/data/des80.a/data/yanny/deepmeds4/run-ugriz-mof02.fits'
 inj_file  = '/data/des80.a/data/yanny/deepmeds4/BALROG_RUN2_DEEP_CAT_FLAG0INVHS1BDFLT254v4.fits'
 gold_file = '/data/des81.a/data/severett/tests/bright_objs/Y3_GOLD_2_2_1.0_bobjs_mags.fits'
-det_file  = '/data/des41.b/data/severett/Balrog/prod020419/stacked_catalogs/1.4/sof/balrog_detection_catalog_sof_v1.4.fits'
+
+#det_file  = '/data/des41.b/data/severett/Balrog/prod020419/stacked_catalogs/1.4/sof/balrog_detection_catalog_sof_v1.4.fits'
 #mcal_file = '/data/des41.b/data/severett/Balrog/prod020419/stacked_catalogs/1.4/mcal/balrog_mcal_stack-y3v02-0-riz-noNB-mcal_v1.4.h5'
-mcal_file = '/data/des81.a/data/severett/matched_stacks/prerun2/mcal/balrog_mcal_stack-y3v02-0-riz-mcal_v1.0.h5'
+
+det_file = '/data/des81.a/data/severett/matched_stacks/run2/sof/balrog_detection_catalog_sof_run2_v1.0.fits'
+mcal_file = '/data/des81.a/data/severett/matched_stacks/run2/mcal/balrog_mcal_stack-y3v02-0-riz-mcal_v1.0.h5'
 
 def plot_mags(mags, mmin=15, mmax=30, dm=0.25, label='', a=0.5, c=None, s=10, title=None, density=False, show=True):
     bins = np.arange(mmin, mmax+dm, dm)
