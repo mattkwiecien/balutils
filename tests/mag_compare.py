@@ -117,12 +117,12 @@ def main():
                        )
         df.apply_cut(dcut)
     elif '2' in run_name:
-        df_cols = ['bdf_mag', 'bdf_mask_flags']
+        df_cols = ['bdf_mag', 'mask_flags']
         print('Loading DF...')
         df = sc.FitsCatalog(df_file, cols=df_cols)
         dcut = np.where(
                          (df['bdf_mag'][:,2]<mmax) &
-                         (df['bdf_mask_flags']!=0)
+                         (df['mask_flags']==0)
                        )
         df.apply_cut(dcut)
 
