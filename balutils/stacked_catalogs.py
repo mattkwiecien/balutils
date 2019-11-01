@@ -4,7 +4,7 @@ import fitsio
 import h5py
 import numpy as np
 from astropy.table import Table, vstack, join
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 # NOTE: Try using generators for Table chunks if files get too large!
 # http://docs.astropy.org/en/stable/io/ascii/read.html#reading-large-tables-in-chunks
@@ -95,6 +95,10 @@ class GoldCatalog(Catalog):
 
     def __init__(self, filename, cols=None, match_type='default'):
         super(GoldCatalog, self).__init__(filename, cols=None)
+
+        self.match_type = match_type
+        self._set_gold_colname(match_type)
+
         return
 
     def _set_gold_colname(self, match_type):
@@ -132,16 +136,14 @@ class FitsCatalog(Catalog):
 # TODO: Remove if not useful
 class GoldFitsCatalog(FitsCatalog, GoldCatalog):
     def __init__(self, filename, cols=None, match_type='default'):
-        super(GoldFitsCatalog, self).__init__(filename, cols=cols, match_type='default')
-        self.match_type = match_type
+        super(GoldFitsCatalog, self).__init__(filename, cols=cols, match_type=match_type)
 
         return
 
 class DetectionCatalog(FitsCatalog, GoldCatalog):
 
     def __init__(self, filename, cols=None, match_type='default'):
-        super(DetectionCatalog, self).__init__(filename, cols=cols, match_type='default')
-        self.match_type = match_type
+        super(DetectionCatalog, self).__init__(filename, cols=cols, match_type=match_type)
 
         self._check_for_duplicates()
 
@@ -255,7 +257,7 @@ class McalCatalog(H5Catalog):
 
         return
 
-class BalrogMcalCatalog(GoldCatalog):
+class BalrogMcalCatalog(GoldCatalog, McalCatalog):
 
     def __init__(self, mcal_file, det_file, mcal_cols=None, det_cols=None,
                  mcal_path='catalog/unsheared', match_type='default', save_all=False,
@@ -266,11 +268,8 @@ class BalrogMcalCatalog(GoldCatalog):
         self.mcal_cols = mcal_cols
         self.det_cols = det_cols
         self.mcal_path = mcal_path
-        self.match_type = match_type
         self.save_all = save_all
         self.vb = vb
-
-        self._set_gold_colname(match_type)
 
         self._load_catalog()
 
@@ -302,47 +301,167 @@ class BalrogMcalCatalog(GoldCatalog):
 
         return
 
-class BalrogMatchedCatalog(FitsCatalog, GoldCatalog):
 
-    def __init__(self, match_file, det_file, match_cols=None, det_cols=None,
-                 match_type='default', save_all=False, vb=False):
+class BalrogDetectionCatalog(DetectionCatalog):
 
-        self.match_file = match_file
-        self.det_file = det_file
-        self.match_cols = match_cols
-        self.det_cols = det_cols
-        self.match_type = match_type
-        self.save_all = save_all
-        self.vb = vb
+    def __init__(self, filename, cols=None, match_type='default', profile='bdf',
+                 has_mags=True, dereddened=True, real=0):
 
-        self._set_gold_colname(match_type)
+        super(BalrogDetectionCatalog, self).__init__(filename,
+                                                     cols=cols,
+                                                     match_type=match_type)
 
-        self._load_catalog()
+        self.profile = profile
+        self.prefix = profile + '_'
+        self.has_mags = has_mags
+        self.dereddened = dereddened
+        self.b_indx = dict(zip('griz', range(4)))
 
-        return
+        # Could be optional parameters in the future, but enforced for now
+        self.true_prefix = 'true_'
+        self.meas_prefix = 'meas_'
 
-    def _load_catalog(self):
-        if self.vb is True: print('Loading matched catalog...')
-        match = FitsCatalog(self.match_file, cols=self.match_cols)
-
-        if self.vb is True: print('Loading detection catalog...')
-        det = DetectionCatalog(self.det_file, cols=self.det_cols)
-
-        if self.vb is True: print('Joining catalogs...')
-        self._join(match.get_cat(), det.get_cat())
-
-        return
-
-
-    def _join(self, match, det):
-        self._cat = join(match, det, join_type='left')
-
-        if self.save_all is True:
-            self.match = match
-            self.det = det
+        p = self.prefix
+        if has_mags is True:
+            if dereddened is True:
+                self.true_mag_colname  = self.true_prefix + p + 'mag_deredden'
         else:
-            self.match = None
-            self.det = None
+            self.true_mag_colname  = self.true_prefix + p + 'mag'
+
+        if not isinstance(real, int):
+            raise TypeError('real must be an int!')
+        self.real = real
 
         return
+
+    def plot_detection_efficiency(self, bands='griz', xlim=[16.0, 30.0], ylim=[0.0, 1.0],
+                                  S=8, title=None, cmap='inferno', dim=2, dx=0.1,
+                                  vline=None):
+            p = self.prefix
+            mcol = self.true_mag_colname
+
+            columns = [mcol, 'detected']
+            cat = fitsio.read(self.filename, columns=columns)
+
+            N = 2. / (dx) + 1
+            mag_min, mag_max = xlim[0], xlim[1]
+            bins = np.linspace(mag_min, mag_max, N)
+
+            IN_BIN = {}
+            DET = {}
+            EFF = {}
+            EFF_ERR = {}
+            MAG = {}
+
+            for x in [IN_BIN, DET, EFF, EFF_ERR, MAG]:
+                for band in bands:
+                    x[band] = []
+
+            for band in bands:
+                print('Band {}'.format(band))
+                bi = self.b_indx[band]
+                for i, bstart in enumerate(bins):
+                    if i == len(bins)-1:
+                        break
+                    else:
+                        # print 'i, bins[i], bins[i+1] = ',i, bins[i], bins[i+1]
+
+                        in_bin = len(cat[(bins[i]<=cat[mcol][:,bi]) & (cat[mcol][:,bi]<bins[i+1])])
+                        det = len(cat[(bins[i]<=cat[mcol][:,bi]) &
+                                (cat[mcol][:,bi]<bins[i+1]) &
+                                (cat['detected']==1)])
+                    try:
+                        eff = 100. * det / in_bin
+                    except ZeroDivisionError:
+                        eff = 0.0
+
+                    mag = np.mean([bins[i], bins[i+1]])
+
+                    try:
+                        eff_err = eff * np.sqrt( (1. / det) + (1. / det) )
+                    except ZeroDivisionError:
+                        eff_err = 0.0
+
+                    IN_BIN[band].append(in_bin)
+                    DET[band].append(det)
+                    EFF[band].append(eff)
+                    EFF_ERR[band].append(eff_err)
+                    MAG[band].append(mag)
+
+            bk = 0
+            for band in bands:
+                # ax = plt.subplot(2, 2, bi+1)
+
+                plt.errorbar(MAG[band], EFF[band], EFF_ERR[band], fmt='o', ms=8, label=band)
+                # plt.gca().axhline(0, ls='--', c='k', lw=4)
+                # med = np.median(diff[cuts])
+                # ax.axhline(med, ls=':', c='w', lw=3, label='Median={:.3f}'.format(med))
+                # cb = plt.colorbar(hb, ax=ax)
+                # legend = plt.legend(bbox_to_anchor=(0.6, 0.925), bbox_transform=ax.transAxes, fontsize=18)
+                # plt.setp(legend.get_texts(), color='w')
+
+                # label = val
+                # if self.use_deredden is True:
+                #     label += ' (dereddened)'
+
+                # for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                #             ax.get_xticklabels() + ax.get_yticklabels()):
+                #     item.set_fontsize(20)
+
+            if title: plt.suptitle(title)
+            ax = plt.gca()
+            ax.set_xlabel('True {}_mag_deredden'.format(self.profile))
+            ax.set_ylabel('Detection Efficiency')
+            plt.legend()
+
+            if vline is not None:
+                plt.axvline(vline, linewidth=2, ls='--', color='k')
+
+            plt.gcf().set_size_inches(S, S)
+
+            return
+
+# class BalrogMatchedCatalog(FitsCatalog, GoldCatalog):
+
+#     def __init__(self, match_file, det_file, match_cols=None, det_cols=None,
+#                  match_type='default', save_all=False, vb=False):
+
+#         self.match_file = match_file
+#         self.det_file = det_file
+#         self.match_cols = match_cols
+#         self.det_cols = det_cols
+#         self.match_type = match_type
+#         self.save_all = save_all
+#         self.vb = vb
+
+#         self._set_gold_colname(match_type)
+
+#         self._load_catalog()
+
+#         return
+
+#     def _load_catalog(self):
+#         if self.vb is True: print('Loading matched catalog...')
+#         match = FitsCatalog(self.match_file, cols=self.match_cols)
+
+#         if self.vb is True: print('Loading detection catalog...')
+#         det = DetectionCatalog(self.det_file, cols=self.det_cols)
+
+#         if self.vb is True: print('Joining catalogs...')
+#         self._join(match.get_cat(), det.get_cat())
+
+#         return
+
+
+    # def _join(self, match, det):
+    #     self._cat = join(match, det, join_type='left')
+
+    #     if self.save_all is True:
+    #         self.match = match
+    #         self.det = det
+    #     else:
+    #         self.match = None
+    #         self.det = None
+
+    #     return
 
