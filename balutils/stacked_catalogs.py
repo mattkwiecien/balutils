@@ -31,8 +31,8 @@ class Catalog(object):
         pass
 
     @staticmethod
-    def flux2mag(flux, zp=30.):
-        return -2.5 * np.log10(flux) + zp
+    def flux2mag(flux, zp=30., clip_val=0.001):
+        return -2.5 * np.log10(flux.clip(clip_val)) + zp
 
     def apply_cut(self, cut):
         self._cat = self._cat[cut]
