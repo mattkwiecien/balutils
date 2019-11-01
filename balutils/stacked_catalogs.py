@@ -272,6 +272,7 @@ class BalrogMcalCatalog(GoldCatalog, McalCatalog):
         self.save_all = save_all
         self.vb = vb
 
+        self._set_gold_colname(match_type)
         self._load_catalog()
 
         return
