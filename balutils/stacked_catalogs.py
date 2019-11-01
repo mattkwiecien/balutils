@@ -268,6 +268,7 @@ class BalrogMcalCatalog(GoldCatalog, McalCatalog):
         self.mcal_cols = mcal_cols
         self.det_cols = det_cols
         self.mcal_path = mcal_path
+        self.match_type = match_type
         self.save_all = save_all
         self.vb = vb
 
