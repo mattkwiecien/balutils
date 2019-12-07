@@ -423,47 +423,28 @@ class BalrogDetectionCatalog(DetectionCatalog):
 
             return
 
-# class BalrogMatchedCatalog(FitsCatalog, GoldCatalog):
+class BalrogMatchedCatalog(FitsCatalog):
 
-#     def __init__(self, match_file, det_file, match_cols=None, det_cols=None,
-#                  match_type='default', save_all=False, vb=False):
+    def __init__(self, match_file, match_cols=None, match_type='default',
+                 vb=False):
 
-#         self.match_file = match_file
-#         self.det_file = det_file
-#         self.match_cols = match_cols
-#         self.det_cols = det_cols
-#         self.match_type = match_type
-#         self.save_all = save_all
-#         self.vb = vb
+        super(BalrogMatchedCatalog, self).__init__(match_file, match_cols)
 
-#         self._set_gold_colname(match_type)
+        # Would normally connect this to a Gold catalog, but the matched
+        # catalogs don't have the positional flags yet
+        self.match_type = match_type
+        self.vb = vb
 
-#         self._load_catalog()
+        return
 
-#         return
+    def cut_by_bal_id(self, bal_ids):
+        '''
+        Some sample cuts depend on columns not present in the matched
+        catalog. In those cases, it is easiest to make the cut on
+        the detection catalog and then filter by bal_id.
+        '''
 
-#     def _load_catalog(self):
-#         if self.vb is True: print('Loading matched catalog...')
-#         match = FitsCatalog(self.match_file, cols=self.match_cols)
+        self.apply_cut(self._cat['bal_id'] in bal_ids)
 
-#         if self.vb is True: print('Loading detection catalog...')
-#         det = DetectionCatalog(self.det_file, cols=self.det_cols)
-
-#         if self.vb is True: print('Joining catalogs...')
-#         self._join(match.get_cat(), det.get_cat())
-
-#         return
-
-
-    # def _join(self, match, det):
-    #     self._cat = join(match, det, join_type='left')
-
-    #     if self.save_all is True:
-    #         self.match = match
-    #         self.det = det
-    #     else:
-    #         self.match = None
-    #         self.det = None
-
-    #     return
+        return
 
