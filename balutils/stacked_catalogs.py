@@ -170,7 +170,7 @@ class DetectionCatalog(FitsCatalog, GoldCatalog):
                 indx = np.where(self._cat['bal_id']==did)[0]
 
                 L = len(indx)
-                for i in range(L)-1: # keep last one
+                for i in range(L-1): # keep last one
                     self._cat.remove_row(indx[i])
 
             self.Nobjs = len(self._cat)
