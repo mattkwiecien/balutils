@@ -153,9 +153,6 @@ class DetectionCatalog(FitsCatalog, GoldCatalog):
         '''
         Balrog stack versions 1.4 and below have a small bug that
         seems to duplicate exactly 1 object, so check for these
-
-        NOTE: Only works if there are exactly 1 extra duplicate for
-        a given bal_id!
         '''
         unq, unq_idx, unq_cnt = np.unique(self._cat['bal_id'],
                                           return_inverse=True,
@@ -171,7 +168,10 @@ class DetectionCatalog(FitsCatalog, GoldCatalog):
             Nbefore = self.Nobjs
             for did in dup_ids:
                 indx = np.where(self._cat['bal_id']==did)[0]
-                self._cat.remove_row(indx[0])
+
+                L = len(indx)
+                for i in range(L)-1: # keep last one
+                    self._cat.remove_row(indx[i])
 
             self.Nobjs = len(self._cat)
             assert self.Nobjs == (Nbefore - Ndups)
