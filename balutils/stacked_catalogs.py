@@ -292,7 +292,7 @@ class BalrogMcalCatalog(GoldCatalog, McalCatalog):
 
 
     def _join(self, mcal, det):
-        self._cat = join(mcal, det, join_type='left')
+        self._cat = join(mcal, det, join_type='inner')
 
         if self.save_all is True:
             self.mcal = mcal
