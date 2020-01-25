@@ -358,8 +358,8 @@ class BalrogMcalCatalog(GoldCatalog, McalCatalog):
 
     def _load_catalog(self):
         if self.vb is True: print('Loading Mcal catalog...')
-        mcal = McalCatalog(self.mcal_file, self.mcal_path, cols=self.mcal_cols, vb=self.vb)
-        mcal.calc_mags()
+        mcal = McalCatalog(self.mcal_file, self.mcal_path, cols=self.mcal_cols)
+        #mcal.calc_mags()
 
         if self.vb is True: print('Loading Detection catalog...')
         det = DetectionCatalog(self.det_file, cols=self.det_cols)
