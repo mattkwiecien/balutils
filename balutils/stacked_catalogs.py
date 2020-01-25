@@ -225,6 +225,10 @@ class McalCatalog(H5Catalog):
                        'psf_T',
                        'snr'
                       ]
+    _sompz_cut_cols = ['mag_r',
+                       'mag_i',
+                       'mag_z'
+                      ]
 
     def __init__(self, filename, basepath, cols=None):
         super(McalCatalog, self).__init__(filename, basepath, cols=cols)
@@ -249,11 +253,32 @@ class McalCatalog(H5Catalog):
     def apply_shape_cuts(self):
         self._check_for_cols(self._shape_cut_cols)
         shape_cuts = np.where( (self._cat['flags'] == 0) &
-                              ((self._cat['T']/self._cat['psf_T']) > 0.5) &
-                              (self._cat['snr'] > 10) &
-                              (self._cat['snr'] < 100)
-                            )
+                               ((self._cat['T']/self._cat['psf_T']) > 0.5) &
+                               (self._cat['snr'] > 10) &
+                               (self._cat['snr'] < 100)
+                              )
         self.apply_cut(shape_cuts)
+
+        return
+
+    def apply_sompz_cuts(self):
+        '''
+        This is the same as "selection2"
+        '''
+        self._check_for_cols(self._sompz_cut_cols)
+        self.apply_cut(shape_cuts)
+
+        sompz_cuts = np.where( (bal_mcal['mag_i'] >= 18.) &
+                               (bal_mcal['mag_i'] <= 23.5) &
+                               (bal_mcal['mag_r'] >= 15.) &
+                               (bal_mcal['mag_r'] <= 26.) &
+                               (bal_mcal['mag_z'] >= 15.) &
+                               (bal_mcal['mag_z'] <= 26.) &
+                               ((bal_mcal['mag_z'] - bal_mcal['mag_i']) <= 1.5) &
+                               ((bal_mcal['mag_z'] - bal_mcal['mag_i']) >= -4.) &
+                               ((bal_mcal['mag_r'] - bal_mcal['mag_i']) <= 4.) &
+                               ((bal_mcal['mag_r'] - bal_mcal['mag_i']) >= -1.5)
+                              )
 
         return
 
