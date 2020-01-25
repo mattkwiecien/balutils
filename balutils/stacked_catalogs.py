@@ -301,7 +301,7 @@ class McalCatalog(H5Catalog):
 
         return
 
-    def compute_gap_fluxes(self, vb):
+    def compute_gap_fluxes(self, vb=False):
         import ngmix
 
         self._check_for_cols(self._gap_flux_cols)
