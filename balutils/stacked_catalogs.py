@@ -244,13 +244,10 @@ class McalCatalog(H5Catalog):
                       'flux_z'
                       ]
 
-    def __init__(self, filename, basepath, cols=None, compute_gap_fluxes=False, vb=False):
+    def __init__(self, filename, basepath, cols=None):
         super(McalCatalog, self).__init__(filename, basepath, cols=cols)
 
         self.calc_mags()
-
-        if compute_gap_fluxes is True:
-            self._compute_gap_fluxes(vb)
 
         return
 
@@ -304,7 +301,7 @@ class McalCatalog(H5Catalog):
 
         return
 
-    def _compute_gap_fluxes(self, vb):
+    def compute_gap_fluxes(self, vb):
         import ngmix
 
         self._check_for_cols(self._gap_flux_cols)
@@ -342,8 +339,8 @@ class McalCatalog(H5Catalog):
 class BalrogMcalCatalog(GoldCatalog, McalCatalog):
 
     def __init__(self, mcal_file, det_file, mcal_cols=None, det_cols=None,
-                 mcal_path='catalog/unsheared', match_type='default', save_all=False,
-                 compute_gap_fluxes=False, vb=False):
+                 mcal_path='catalog/unsheared', match_type='default',
+                 save_all=False, vb=False):
 
         self.mcal_file = mcal_file
         self.det_file = det_file
@@ -352,7 +349,6 @@ class BalrogMcalCatalog(GoldCatalog, McalCatalog):
         self.mcal_path = mcal_path
         self.match_type = match_type
         self.save_all = save_all
-        self.compute_gap_fluxes = compute_gap_fluxes
         self.vb = vb
 
         self._set_gold_colname(match_type)
@@ -362,8 +358,7 @@ class BalrogMcalCatalog(GoldCatalog, McalCatalog):
 
     def _load_catalog(self):
         if self.vb is True: print('Loading Mcal catalog...')
-        mcal = McalCatalog(self.mcal_file, self.mcal_path, cols=self.mcal_cols,
-                           compute_gap_fluxes=self.compute_gap_fluxes, vb=self.vb)
+        mcal = McalCatalog(self.mcal_file, self.mcal_path, cols=self.mcal_cols, vb=self.vb)
         mcal.calc_mags()
 
         if self.vb is True: print('Loading Detection catalog...')
