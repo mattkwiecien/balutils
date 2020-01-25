@@ -296,10 +296,11 @@ class McalCatalog(H5Catalog):
                                ((self._cat['mag_r'] - self._cat['mag_i']) >= -1.5)
                               )
 
-        if use_match_flag is True:
-            sompz_cuts = np.where(sompz_cuts & (self._cat[self._match_flag_col] < 2))
-
         self.apply_cut(sompz_cuts)
+
+        if use_match_flag is True:
+            match_flag_cut = np.where(self._cat[self._match_flag_col] < 2)
+            self.apply_cut(match_flag_cut)
 
         return
 
