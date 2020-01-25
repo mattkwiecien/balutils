@@ -297,7 +297,7 @@ class McalCatalog(H5Catalog):
                               )
 
         if use_match_flag is True:
-            sompz_cuts = np.where(sompz_cuts & (bal_mcal[self._match_flag_col] < 2))
+            sompz_cuts = np.where(sompz_cuts & (self._cat[self._match_flag_col] < 2))
 
         self.apply_cut(sompz_cuts)
 
