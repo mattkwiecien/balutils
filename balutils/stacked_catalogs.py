@@ -220,6 +220,8 @@ class H5Catalog(Catalog):
 
 class McalCatalog(H5Catalog):
 
+    _match_flag_col = 'match_flag_1.5_asec'
+
     _shape_cut_cols = ['flags',
                        'T',
                        'psf_T',
@@ -227,7 +229,8 @@ class McalCatalog(H5Catalog):
                       ]
     _sompz_cut_cols = ['mag_r',
                        'mag_i',
-                       'mag_z'
+                       'mag_z',
+                       _match_flag_col
                       ]
 
     def __init__(self, filename, basepath, cols=None):
@@ -261,12 +264,11 @@ class McalCatalog(H5Catalog):
 
         return
 
-    def apply_sompz_cuts(self):
+    def apply_sompz_cuts(self, use_match_flag=True):
         '''
         This is the same as "selection2"
         '''
         self._check_for_cols(self._sompz_cut_cols)
-        self.apply_cut(shape_cuts)
 
         sompz_cuts = np.where( (bal_mcal['mag_i'] >= 18.) &
                                (bal_mcal['mag_i'] <= 23.5) &
@@ -279,6 +281,11 @@ class McalCatalog(H5Catalog):
                                ((bal_mcal['mag_r'] - bal_mcal['mag_i']) <= 4.) &
                                ((bal_mcal['mag_r'] - bal_mcal['mag_i']) >= -1.5)
                               )
+
+        if use_match_flag is True:
+            sompz_cuts = np.where(sompz_cuts & (bal_mcal[self._match_flag_col] < 2))
+
+        self.apply_cut(sompz_cuts)
 
         return
 
