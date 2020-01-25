@@ -284,16 +284,16 @@ class McalCatalog(H5Catalog):
         '''
         self._check_for_cols(self._sompz_cut_cols)
 
-        sompz_cuts = np.where( (bal_mcal['mag_i'] >= 18.) &
-                               (bal_mcal['mag_i'] <= 23.5) &
-                               (bal_mcal['mag_r'] >= 15.) &
-                               (bal_mcal['mag_r'] <= 26.) &
-                               (bal_mcal['mag_z'] >= 15.) &
-                               (bal_mcal['mag_z'] <= 26.) &
-                               ((bal_mcal['mag_z'] - bal_mcal['mag_i']) <= 1.5) &
-                               ((bal_mcal['mag_z'] - bal_mcal['mag_i']) >= -4.) &
-                               ((bal_mcal['mag_r'] - bal_mcal['mag_i']) <= 4.) &
-                               ((bal_mcal['mag_r'] - bal_mcal['mag_i']) >= -1.5)
+        sompz_cuts = np.where( (self._cat['mag_i'] >= 18.) &
+                               (self._cat['mag_i'] <= 23.5) &
+                               (self._cat['mag_r'] >= 15.) &
+                               (self._cat['mag_r'] <= 26.) &
+                               (self._cat['mag_z'] >= 15.) &
+                               (self._cat['mag_z'] <= 26.) &
+                               ((self._cat['mag_z'] - self._cat['mag_i']) <= 1.5) &
+                               ((self._cat['mag_z'] - self._cat['mag_i']) >= -4.) &
+                               ((self._cat['mag_r'] - self._cat['mag_i']) <= 4.) &
+                               ((self._cat['mag_r'] - self._cat['mag_i']) >= -1.5)
                               )
 
         if use_match_flag is True:
