@@ -233,7 +233,6 @@ class McalCatalog(H5Catalog):
     _sompz_cut_cols = ['mag_r',
                        'mag_i',
                        'mag_z',
-                       _match_flag_col
                       ]
 
     _gap_flux_cols = ['e_1',
@@ -296,6 +295,7 @@ class McalCatalog(H5Catalog):
         self.apply_cut(sompz_cuts)
 
         if use_match_flag is True:
+            self._check_for_cols(self._match_flag_col)
             match_flag_cut = np.where(self._cat[self._match_flag_col] < 2)
             self.apply_cut(match_flag_cut)
 
