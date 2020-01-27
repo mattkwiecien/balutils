@@ -233,6 +233,9 @@ class McalCatalog(H5Catalog):
     _sompz_cut_cols = ['mag_r',
                        'mag_i',
                        'mag_z',
+                       'e_1',
+                       'e_2',
+                       'T',
                       ]
 
     _gap_flux_cols = ['e_1',
@@ -280,7 +283,8 @@ class McalCatalog(H5Catalog):
         '''
         self._check_for_cols(self._sompz_cut_cols)
 
-        sompz_cuts = np.where( (self._cat['mag_i'] >= 18.) &
+        # Mag & color cuts
+        color_cuts = np.where( (self._cat['mag_i'] >= 18.) &
                                (self._cat['mag_i'] <= 23.5) &
                                (self._cat['mag_r'] >= 15.) &
                                (self._cat['mag_r'] <= 26.) &
@@ -292,7 +296,20 @@ class McalCatalog(H5Catalog):
                                ((self._cat['mag_r'] - self._cat['mag_i']) >= -1.5)
                               )
 
-        self.apply_cut(sompz_cuts)
+        self.apply_cut(color_cuts)
+
+        # Binary star cut, taken from Alex A.
+        highe_cut = np.greater(np.sqrt(np.power(self._cat['e_1'],2.)
+                               + np.power(self._cat['e_2'],2)), 0.8)
+
+        c = 22.5
+        m = 3.5
+
+        magT_cut = np.log10(self_cat['T']) < (c - flux2mag(self_cat['flux_r'])) / m
+
+        binaries = highe_cut * magT_cut
+
+        self.apply_cut(~binaries)
 
         if use_match_flag is True:
             self._check_for_cols(self._match_flag_col)
