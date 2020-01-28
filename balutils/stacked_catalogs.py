@@ -305,7 +305,7 @@ class McalCatalog(H5Catalog):
         c = 22.5
         m = 3.5
 
-        magT_cut = np.log10(self_cat['T']) < (c - flux2mag(self_cat['flux_r'])) / m
+        magT_cut = np.log10(self._cat['T']) < (c - flux2mag(self._cat['flux_r'])) / m
 
         binaries = highe_cut * magT_cut
 
