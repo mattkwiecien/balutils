@@ -21,6 +21,7 @@ class Catalog(object):
     def __init__(self, filename, cols=None):
         self.filename = filename
         self.cols = cols
+        self._cat = None
 
         self._load_catalog()
 
@@ -226,8 +227,7 @@ class McalCatalog(H5Catalog):
     _match_flag_col = 'match_flag_1.5_asec'
 
     _shape_cut_cols = ['flags',
-                       'T',
-                       'psf_T',
+                       'size_ratio',
                        'snr'
                       ]
     _sompz_cut_cols = ['mag_r',
@@ -269,9 +269,9 @@ class McalCatalog(H5Catalog):
     def apply_shape_cuts(self):
         self._check_for_cols(self._shape_cut_cols)
         shape_cuts = np.where( (self._cat['flags'] == 0) &
-                               ((self._cat['T']/self._cat['psf_T']) > 0.5) &
+                               ((self._cat['size_ratio'] > 0.5) &
                                (self._cat['snr'] > 10) &
-                               (self._cat['snr'] < 100)
+                               (self._cat['snr'] < 1000)
                               )
         self.apply_cut(shape_cuts)
 
@@ -544,3 +544,55 @@ class BalrogMatchedCatalog(FitsCatalog):
 
         return
 
+# TODO: In progress!!!
+class MastercatGoldCatalog(Catalog):
+    def __init__(filename='/global/project/projectdirs/des/www/y3_cats/Y3_mastercat_12_3_19.h5',
+                 cols=None, bands='griz', vb=False):
+
+        super(MastercatGoldCatalog, self).__init__(filename, cols)
+
+        self.bands = bands
+        self.vb = vb
+
+        self._cat = Table()
+
+        h5 = h5py.File(filename, mode='r')
+        select = h5['index/select'][:]
+
+        for b in bands:
+            if self.vb is True:
+                print('Starting band {}'.format(b))
+            gld_mcal['flux_{}'.format(b)] = gld['catalog/gold...fdk/flux_{}'.format(b)][:][select]
+            gld_mcal['flux_err_{}'.format(b)] = gld['catalog/metacal/unsheared/flux_err_{}'.format(b)][:][select]
+            gld_mcal['mag_{}'.format(b)] = flux2mag(gld_mcal['flux_{}'.format(b)])
+
+        colnames = ['T']
+
+        for col in colnames:
+            gld_mcal[col] = gld['catalog/metacal/unsheared/'+col][:][select]
+
+class MastercatMcalCatalog(Catalog):
+    def __init__(filename='/global/project/projectdirs/des/www/y3_cats/Y3_mastercat_12_3_19.h5',
+                 cols=None, bands='griz', vb=False):
+
+        super(MastercatGoldCatalog, self).__init__(filename, cols)
+
+        self.bands = bands
+        self.vb = vb
+
+        self._cat = Table()
+
+        h5 = h5py.File(filename, mode='r')
+        select = h5['index/select'][:]
+
+        for b in bands:
+            if self.vb is True:
+                print('Starting band {}'.format(b))
+            gld_mcal['flux_{}'.format(b)] = gld['catalog/metacal/unsheared/flux_{}'.format(b)][:][select]
+            gld_mcal['flux_err_{}'.format(b)] = gld['catalog/metacal/unsheared/flux_err_{}'.format(b)][:][select]
+            gld_mcal['mag_{}'.format(b)] = flux2mag(gld_mcal['flux_{}'.format(b)])
+
+        colnames = ['T']
+
+        for col in colnames:
+            gld_mcal[col] = gld['catalog/metacal/unsheared/'+col][:][select]
