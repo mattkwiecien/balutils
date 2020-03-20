@@ -269,7 +269,7 @@ class McalCatalog(H5Catalog):
     def apply_shape_cuts(self):
         self._check_for_cols(self._shape_cut_cols)
         shape_cuts = np.where( (self._cat['flags'] == 0) &
-                               ((self._cat['size_ratio'] > 0.5) &
+                               (self._cat['size_ratio'] > 0.5) &
                                (self._cat['snr'] > 10) &
                                (self._cat['snr'] < 1000)
                               )
