@@ -421,7 +421,11 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
                    'psf_T',
                    'mcal_psf_T',
                    'e_1',
-                   'e_2'
+                   'e_2',
+                   'R11',
+                   'R12',
+                   'R21',
+                   'R22',
                    }
 
     def __init__(self, mcal_file, det_file, mcal_cols=None, det_cols=None,
