@@ -5,7 +5,7 @@ import h5py
 import numpy as np
 from astropy.table import Table, vstack, join
 import matplotlib.pyplot as plt
-import pudb
+# import pudb
 
 # NOTE: Try using generators for Table chunks if files get too large!
 # http://docs.astropy.org/en/stable/io/ascii/read.html#reading-large-tables-in-chunks
