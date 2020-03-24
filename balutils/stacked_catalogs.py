@@ -481,12 +481,13 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
 
             if self.vb is True:
                 print('Joining catalogs...')
-            self._join(stype, mcal.get_cat(), det.get_cat())
+            self._join(stype, mcal, det)
 
         return
 
     def _join(self, stype, mcal, det):
-        self._cat[stype] = join(mcal, det, join_type='inner')
+        mcal._cat = join(mcal.get_cat(), det.get_cat(), join_type='inner')
+        self._cat[stype] = mcal
 
         if self.save_all is True:
             self.mcal[stype] = mcal
@@ -513,11 +514,11 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
 
         return
 
-    def apply_sompz_cuts(self):
+    def apply_sompz_cuts(self, use_match_flag=True):
         for stype in self.stypes:
             if self.vb is True:
                 print('Applying cut to {}'.format(stype))
-            self._cat[stype].apply_sompz_cuts()
+            self._cat[stype].apply_sompz_cuts(use_match_flag=use_match_flag)
 
         return
 
