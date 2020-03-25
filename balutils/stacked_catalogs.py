@@ -49,6 +49,8 @@ class Catalog(object):
         self._cat = self._cat.filled()
 
     def _check_for_cols(self, cols):
+        if not isinstance(cols, list):
+            cols = [cols]
         for col in cols:
             if col not in self._cat.colnames:
                 raise AttributeError('{} not found in joined '.format(col) +
@@ -539,29 +541,6 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
             elf._cat[stype].apply_cut(cut)
 
         return
-
-    def __getitem__(self, stype, key):
-        return self._cat[stype][key]
-        # stype, k = key.split('/')
-        # return self._cat[stype][k]
-
-    def __setitem__(self, key, value):
-        stype, k = key.split('/')
-        self._cat[stype][k] = value
-
-    def __delitem__(self, key):
-        stype, k = key.split('/')
-        del self._cat[stype][k]
-
-    def __contains__(self, key):
-        stype, k = key.split('/')
-        return key in self._cat[stype]
-
-    def __len__(self):
-        return len(self._cat)
-
-    def __repr__(self):
-        return repr(self._cat)
 
 class BalrogDetectionCatalog(DetectionCatalog):
 
