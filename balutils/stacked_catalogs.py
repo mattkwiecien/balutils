@@ -5,7 +5,7 @@ import h5py
 import numpy as np
 from astropy.table import Table, vstack, join
 import matplotlib.pyplot as plt
-# import pudb
+import pudb
 
 # NOTE: Try using generators for Table chunks if files get too large!
 # http://docs.astropy.org/en/stable/io/ascii/read.html#reading-large-tables-in-chunks
@@ -98,8 +98,8 @@ class GoldCatalog(Catalog):
                       'sof_only':_gold_cut_cols_sof_only
                       }
 
-    def __init__(self, filename, cols=None, match_type='default'):
-        super(GoldCatalog, self).__init__(filename, cols=None)
+    def __init__(self, filename, cols=None, match_type='default', **kwargs):
+        super(GoldCatalog, self).__init__(filename, cols=cols, **kwargs)
 
         self.match_type = match_type
         self._set_gold_colname(match_type)
@@ -187,9 +187,9 @@ class DetectionCatalog(FitsCatalog, GoldCatalog):
 
 class H5Catalog(Catalog):
 
-    def __init__(self, filename, basepath, cols=None):
+    def __init__(self, filename, basepath, cols=None, **kwargs):
         self.basepath = basepath
-        super(H5Catalog, self).__init__(filename, cols=cols)
+        super(H5Catalog, self).__init__(filename, cols=cols, **kwargs)
 
         return
 
@@ -247,8 +247,8 @@ class McalCatalog(H5Catalog):
                       'flux_z'
                       ]
 
-    def __init__(self, filename, basepath, cols=None):
-        super(McalCatalog, self).__init__(filename, basepath, cols=cols)
+    def __init__(self, filename, basepath, cols=None, **kwargs):
+        super(McalCatalog, self).__init__(filename, basepath, cols=cols, **kwargs)
 
         self.calc_mags()
 
@@ -354,6 +354,13 @@ class McalCatalog(H5Catalog):
 
         return
 
+class McalGoldCatalog(McalCatalog, GoldCatalog):
+    pass
+    # def __init__(self, filename, basepath, cols=None):
+    #     super(McalGoldCatalog, self).__init__(filename, basepath, cols=cols)
+
+    #     return
+
 class BalrogMcalCatalog(GoldCatalog, McalCatalog):
 
     def __init__(self, mcal_file, det_file, mcal_cols=None, det_cols=None,
@@ -433,6 +440,8 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
 
         if stypes == 'all':
             self.stypes = self._valid_shear_types
+        else:
+            self.stypes = stypes
         if 'unsheared' in self.stypes:
             self.has_unsheared = True
         else:
@@ -442,7 +451,6 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
                                                  det_cols=det_cols, mcal_path=None,
                                                  match_type=match_type, save_all=save_all,
                                                  vb=vb)
-
         return
 
     def _load_catalog(self):
@@ -461,14 +469,13 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
             if self.vb is True:
                 print('Loading {} Mcal catalog...'.format(stype))
 
-            # pudb.set_trace()
             if stype != 'unsheared':
                 for c in self._mcal_flats:
                     if c in mcal_cols:
                         mcal_cols.remove(c)
 
             path = 'catalog/'+stype+'/'
-            mcal = McalCatalog(self.mcal_file, path, cols=mcal_cols)
+            mcal = McalGoldCatalog(self.mcal_file, path, cols=mcal_cols, match_type=self.match_type)
 
             if stype == 'unsheared':
                 for col in self._mcal_flats:
@@ -501,7 +508,7 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
     def apply_gold_cuts(self):
         for stype in self.stypes:
             if self.vb is True:
-                print('Applying cut to {}'.format(stype))
+                print('Applying gold cuts to {}'.format(stype))
             self._cat[stype].apply_gold_cuts()
 
         return
@@ -509,7 +516,7 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
     def apply_shape_cuts(self):
         for stype in self.stypes:
             if self.vb is True:
-                print('Applying cut to {}'.format(stype))
+                print('Applying shape cuts to {}'.format(stype))
             self._cat[stype].apply_shape_cuts()
 
         return
@@ -517,7 +524,7 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
     def apply_sompz_cuts(self, use_match_flag=True):
         for stype in self.stypes:
             if self.vb is True:
-                print('Applying cut to {}'.format(stype))
+                print('Applying sompz cuts to {}'.format(stype))
             self._cat[stype].apply_sompz_cuts(use_match_flag=use_match_flag)
 
         return
@@ -525,15 +532,18 @@ class BalrogMcalCatalogs(BalrogMcalCatalog):
     def apply_cut(self, cut, stype='all'):
         if stype == 'all':
             for s in self.stypes:
+                if self.vb is True:
+                    print('Applying cut to {}'.format(stype))
                 self._cat[s].apply_cut(cut)
         else:
             elf._cat[stype].apply_cut(cut)
 
         return
 
-    def __getitem__(self, key):
-        stype, k = key.split('/')
-        return self._cat[stype][k]
+    def __getitem__(self, stype, key):
+        return self._cat[stype][key]
+        # stype, k = key.split('/')
+        # return self._cat[stype][k]
 
     def __setitem__(self, key, value):
         stype, k = key.split('/')
