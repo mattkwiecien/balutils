@@ -234,6 +234,17 @@ class BalrogMatchedCatalog(GoldCatalog):
 
         return
 
+    def cut_by_bal_id(self, bal_ids):
+        '''
+        Some sample cuts depend on columns not present in the matched
+        catalog. In those cases, it is easiest to make the cut on
+        the detection catalog and then filter by bal_id.
+        '''
+
+        self.apply_cut(self._cat['bal_id'] in bal_ids)
+
+        return
+
 class H5Catalog(Catalog):
 
     def __init__(self, filename, basepath, cols=None, **kwargs):
@@ -708,7 +719,7 @@ class BalrogDetectionCatalog(DetectionCatalog):
 
             return
 
-class BalrogMatchedCatalog(FitsCatalog):
+class MatchedCatalog(FitsCatalog):
 
     def __init__(self, match_file, match_cols=None, match_type='default',
                  vb=False):
