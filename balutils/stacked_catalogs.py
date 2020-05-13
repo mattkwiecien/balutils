@@ -187,6 +187,53 @@ class DetectionCatalog(FitsCatalog, GoldCatalog):
 
         return
 
+class BalrogMatchedCatalog(GoldCatalog):
+
+    def __init__(self, match_file, det_file, match_cols=None, det_cols=None,
+                 match_type='default', save_all=False, vb=False):
+
+        self.match_file = match_file
+        self.det_file = det_file
+        self.match_cols = match_cols
+        self.det_cols = det_cols
+        self.match_type = match_type
+        self.save_all = save_all
+        self.vb = vb
+
+        self._set_gold_colname(match_type)
+        self._load_catalog()
+
+        return
+
+    def _load_catalog(self):
+        if self.vb is True:
+            print('Loading Matched catalog...')
+        match = GoldFitsCatalog(self.match_file,
+                                cols=self.match_cols,
+                                match_type=self.match_type)
+
+        if self.vb is True:
+            print('Loading Detection catalog...')
+        det = DetectionCatalog(self.det_file, cols=self.det_cols)
+
+        if self.vb is True:
+            print('Joining catalogs...')
+        self._join(match.get_cat(), det.get_cat())
+
+        return
+
+    def _join(self, match, det):
+        self._cat = join(match, det, join_type='inner')
+
+        if self.save_all is True:
+            self.match = match
+            self.det = det
+        else:
+            self.match = None
+            self.det = None
+
+        return
+
 class H5Catalog(Catalog):
 
     def __init__(self, filename, basepath, cols=None, **kwargs):
