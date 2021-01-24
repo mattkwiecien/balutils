@@ -19,7 +19,7 @@ class CatalogFactory():
 
         # loop through each type provided, and attach it's associated decorator
         for catalogType in catalogTypes:
-            catFeatures = _featureLookup[catalogType].applyTo(catFeatures)
+            catFeatures = _featureLookup[catalogType](catFeatures)
 
         catFeatures.applyTo(catalog)
 
