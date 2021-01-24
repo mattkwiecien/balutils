@@ -6,6 +6,7 @@ import numpy as np
 from astropy.table import Table, vstack, join
 import matplotlib.pyplot as plt
 import pudb
+
 class BalrogMcalCatalogs(BalrogMcalCatalog):
 
     _valid_shear_types = ['unsheared',
