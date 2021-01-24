@@ -9,5 +9,6 @@ class SimpleCatalog(CatalogFeature):
     Base catalog features available.
     """
     def applyTo(self, catalog: Catalog) -> None:
-        pass
+        # This catalog does nothing, just starts the decorator
+        return
 

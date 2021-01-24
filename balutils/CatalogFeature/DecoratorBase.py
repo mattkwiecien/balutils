@@ -9,9 +9,9 @@ class DecoratorBase(CatalogFeature):
         self._catalogFeature = catalogFeature
 
     @property
-    def component(self) -> None:
+    def parent(self) -> None:
         return self._catalogFeature
 
     def applyTo(self, catalog: Catalog) -> None:
-        return self._catalogFeature.operation(catalog)
+        return self._catalogFeature.applyTo(catalog)
 

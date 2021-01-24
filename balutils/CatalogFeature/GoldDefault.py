@@ -12,6 +12,10 @@ class GoldDefault(SimpleCatalog):
     _gold_cut_cols = ['flags_foreground', 'flags_badregions', 'flags_footprint', 'meas_FLAGS_GOLD']
 
     def applyTo(self, catalog: Catalog) -> None:
+        
+        # First, call the parent feature method
+        self.parent.applyTo(catalog)
+
         catalog._check_for_cols(_gold_cut_cols)
 
         gold_cuts = np.where(

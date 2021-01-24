@@ -5,6 +5,9 @@ class Detection(SimpleCatalog):
     Adds detection catalog functionality to the catalog.
     """
     def applyTo(self, catalog: Catalog) -> None:
+        
+        self.parent.applyTo(catalog)
+
         '''
         Balrog stack versions 1.4 and below have a small bug that
         seems to duplicate exactly 1 object, so check for these
