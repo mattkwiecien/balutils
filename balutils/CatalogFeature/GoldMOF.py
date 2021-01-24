@@ -15,6 +15,9 @@ class Gold(SimpleCatalog):
     ]
 
     def applyTo(self, catalog: Catalog) -> None:
+        
+        self.parent.applyTo(catalog)
+
         catalog._check_for_cols(_gold_cut_cols)
 
         gold_cuts = np.where(

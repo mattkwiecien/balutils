@@ -1,11 +1,11 @@
 from abc import ABCMeta, abstractmethod
-import os
-import fitsio
-import h5py
+#import os
+#import fitsio
+#import h5py
 import numpy as np
 from astropy.table import Table, vstack, join
 import matplotlib.pyplot as plt
-import pudb
+#import pudb
 from balutils.Helpers import ErrorHelper
 
 #todo strip out functions not core to a "catalog"

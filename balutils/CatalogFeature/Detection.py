@@ -1,4 +1,5 @@
 from balutils.CatalogFeature import SimpleCatalog
+import numpy as np
 
 class Detection(SimpleCatalog):
     """

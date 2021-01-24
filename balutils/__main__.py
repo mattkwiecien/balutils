@@ -4,7 +4,7 @@ from balutils import Catalog
 
 if __name__ == 'main':
 
-    # pass in file name, list of properties that apply to this catalog.
+    # pass in file name, list of properties that apply to this catalog - note order matters here.
 
     # fits catalog
     catalog = CatalogFactory.Create('myFileName', ['fits'])

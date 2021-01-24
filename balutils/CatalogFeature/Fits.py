@@ -1,7 +1,7 @@
 from balutils.CatalogFeature import *
 from balutils import Catalog
 from astropy.table import Table
-import fitsio
+#import fitsio
 
 class Fits(DecoratorBase):
     """
