@@ -1,9 +1,11 @@
 from balutils.CatalogFeature import SimpleCatalog
 
+# TODO
+
 class H5(SimpleCatalog):
     """
     Adds H5 catalog functionality to the catalog.
     """
-    def attach(self) -> None:
+    def applyTo(self) -> None:
         pass
 

@@ -6,6 +6,9 @@ import numpy as np
 from astropy.table import Table, vstack, join
 import matplotlib.pyplot as plt
 import pudb
+from balutils.Helpers import ErrorHelper
+
+#todo strip out functions not core to a "catalog"
 
 class Catalog(object):
 
@@ -18,7 +21,6 @@ class Catalog(object):
 
         return
 
-    # @abstractmethod
     def _load_catalog(self):
         pass
 
@@ -43,9 +45,7 @@ class Catalog(object):
             cols = [cols]
         for col in cols:
             if col not in self._cat.colnames:
-                raise AttributeError('{} not found in joined '.format(col) +
-                                     'catalog but required for requested cuts!')
-
+                return ErrorHelper.missing_column(col)
         return
 
     # The following are so we can access the catalog

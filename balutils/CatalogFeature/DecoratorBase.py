@@ -1,4 +1,5 @@
 from balutils.CatalogFeature import CatalogFeature
+from balutils import Catalog
 
 class DecoratorBase(CatalogFeature):
 
@@ -8,9 +9,9 @@ class DecoratorBase(CatalogFeature):
         self._catalogFeature = catalogFeature
 
     @property
-    def component(self) -> str:
+    def component(self) -> None:
         return self._catalogFeature
 
-    def attach(self) -> None:
-        return self._catalogFeature.operation()
+    def applyTo(self, catalog: Catalog) -> None:
+        return self._catalogFeature.operation(catalog)
 
